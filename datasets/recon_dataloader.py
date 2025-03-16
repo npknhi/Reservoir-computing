@@ -5,11 +5,11 @@ import matplotlib.pyplot as plt
 import os
 
 class InpaintingImageDataGen(tf.keras.utils.Sequence):
-    def __init__(self, data_array, batch_size, corruption_ratio_random=True, corruption_ratio=0.25, seed=None):
+    def __init__(self, data_array, batch_size, training=True, corruption_ratio=0.25, seed=None):
         super(InpaintingImageDataGen, self).__init__()
         self.data_array = data_array
         self.batch_size = batch_size
-        self.corruption_ratio_random = corruption_ratio_random
+        self.training = training
         self.corruption_ratio = corruption_ratio
         self.seed = seed
         self.height, self.width = self.data_array.shape[1], self.data_array.shape[2]
@@ -32,10 +32,10 @@ class InpaintingImageDataGen(tf.keras.utils.Sequence):
         for current_idx in range(left_bound, right_bound):
             img = self.data_array[current_idx].astype('float32')/255.
             # First just randomly flip the image to the left and the right
-            if np.random.normal() > 0:
+            if np.random.normal() > 0 and training:
                 img = np.flip(img, axis=1)
 
-            if self.corruption_ratio_random==True:
+            if self.training:
                 self.corruption_ratio = np.random.uniform(0.25, 0.75)
             mask = np.random.choice([0., 1.], size=(self.height, self.width, 1), replace=True, p=[self.corruption_ratio, 1. - self.corruption_ratio]).astype('float32')
 
